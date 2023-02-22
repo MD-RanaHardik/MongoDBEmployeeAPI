@@ -1,7 +1,7 @@
 use actix_web::{
     get, post,
     web::{self, Json},
-    HttpRequest, HttpResponse, Responder,
+    HttpRequest, HttpResponse, Responder, http::StatusCode,
 };
 use actix_web_httpauth::extractors::basic::BasicAuth;
 use futures::StreamExt;
@@ -41,7 +41,7 @@ pub struct EmployeeDataInsert {
 // view for index / main page of api
 #[get("/")]
 pub async fn greet() -> impl Responder {
-    format!("Hello there!")
+    HttpResponse::build(StatusCode::OK).content_type("text/html; charset=utf-8").body(include_str!("../index.html"))
 }
 
 

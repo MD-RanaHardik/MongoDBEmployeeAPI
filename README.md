@@ -9,18 +9,21 @@ Note: For every request you have to provide USERNAME and PASSWORD in yor BasicAu
 
 1. To get data of perticular employee use below api
 
+   ```
    URL -> http://127.0.0.1:8080/users/{username}
+   ```
 
-
-1. To get data of all employee use below api
-
+2. To get data of all employee use below api
+   ```
    URL -> http://127.0.0.1:8080/users
+   ```
 
-
-1. To add new employee use below api
-
+3. To add new employee use below api
+   ```
    URL -> http://127.0.0.1:8080/insertuser
-   
+   ```
+
+   ```
    Required body :
 
    {
@@ -30,11 +33,14 @@ Note: For every request you have to provide USERNAME and PASSWORD in yor BasicAu
     "Employee_salary":10000,
     "Employee_designation":"Web3 developer"
    }
+   ```
 
-1. To update the data of perticular employee use below api
-
+4. To update the data of perticular employee use below api
+   ```
    URL -> http://127.0.0.1:8080/updateuser/{username}
+   ```
 
+   ```
    Required body :
    
    {
@@ -42,9 +48,10 @@ Note: For every request you have to provide USERNAME and PASSWORD in yor BasicAu
     "Employee_salary":10000,
     "Employee_designation":"Web3 developer"
    }
+   ```
 
 
-1. To delete perticular employee use below api
-
+5. To delete perticular employee use below api
+   ```
    URL-> http://127.0.0.1:8080/deleteuser/{username}
-
+   ```
