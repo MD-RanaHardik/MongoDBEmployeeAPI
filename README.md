@@ -1,6 +1,6 @@
 ![API Image](https://doc.lucidworks.com/assets/images/logos/datasources/rest-api-logo.png)
 
-#How to use Employee API
+# How to use Employee API
 
 
 Note: Replace "http://127.0.0.1:8080/" to  your address.
