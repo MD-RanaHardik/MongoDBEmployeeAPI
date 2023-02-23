@@ -3,14 +3,17 @@
 # How to use Employee API
 
 
-Note: Replace "http://127.0.0.1:8080/" to  your address.
+**Note:**
+   > Replace "http://127.0.0.1:8080/" to  your address.
 
-Note: For every request you have to provide USERNAME and PASSWORD in yor BasicAuth 
+**Note:**
+   > For every request you have to provide USERNAME and PASSWORD in yor BasicAuth 
 
-Note: For every request you have to provide APIT_Token in yor BearerAuth - `Currently worikng on this`
+**Note:**
+   > For every request you have to provide APIT_Token in yor BearerAuth - `Currently worikng on this`
  
 
-`All api only support GET request`
+**`All api only support GET request`**
 
 
 ## API for accessing and  modifying employee data
