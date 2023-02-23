@@ -1,23 +1,22 @@
 use actix_web::{
-    get, post,
-    web::{self, Json},
-    HttpRequest, HttpResponse, Responder, http::StatusCode,
+    get,
+    http::StatusCode,
+    post,
+    web::{self, Data, Form}, HttpResponse, Responder,
 };
-use actix_web_httpauth::extractors::basic::BasicAuth;
+
+use actix_web_httpauth::extractors::bearer::BearerAuth;
 use futures::StreamExt;
 use mongodb::{
-    bson::{doc, Document},
-    options::Credential,
-    Client, Collection,
+    bson::{doc, Document}, Collection,
 };
 use serde::{Deserialize, Serialize};
 
-
+use crate::api_views;
 
 // change if you want to check username and password with diffent credential
 const USERNAME: &str = "Hardik";
 const PASSWORD: &str = "Hardik@@123";
-
 
 // get request body and add to EmployeeDataUpdate struct
 #[derive(Debug, Serialize, Deserialize)]
@@ -37,28 +36,26 @@ pub struct EmployeeDataInsert {
     Employee_designation: String,
 }
 
-
 // view for index / main page of api
 #[get("/")]
 pub async fn greet() -> impl Responder {
-    HttpResponse::build(StatusCode::OK).content_type("text/html; charset=utf-8").body(include_str!("../index.html"))
+    HttpResponse::build(StatusCode::OK)
+        .content_type("text/html; charset=utf-8")
+        .body(include_str!("../index.html"))
 }
 
-
 // get data of perticular employee from therir username
-#[post("/users/{username}")]
+#[get("/users/{username}")]
 pub async fn getPerticulerUsersData(
     username: web::Path<String>,
-    credential: BasicAuth,
+    credential: BearerAuth,
+    col: Data<(Collection<Document>, Collection<Document>)>,
 ) -> impl Responder {
-    if credential.user_id().eq(USERNAME) && credential.password().unwrap().eq(PASSWORD) {
-        let client = Client::with_uri_str("mongodb://localhost:27017")
-            .await
-            .expect("Faild to connect with server");
-
-        let col: Collection<Document> = client.database("FirstDB").collection("Employee");
-
+    if api_views::check_token_and_update_number_of_request(credential.token().to_string(), &col.1)
+        .await
+    {
         match col
+            .0
             .find(
                 doc! {
                 "Username":
@@ -80,17 +77,16 @@ pub async fn getPerticulerUsersData(
     }
 }
 
-
-// get data of all employee 
-#[post("/users")]
-pub async fn getUsers(credential: BasicAuth) -> impl Responder {
-    if credential.user_id().eq(USERNAME) && credential.password().unwrap().eq(PASSWORD) {
-        let client = Client::with_uri_str("mongodb://localhost:27017")
-            .await
-            .unwrap();
-
-        let col: Collection<Document> = client.database("FirstDB").collection("Employee");
-        let mut result = col.find(doc! {}, None).await.expect("faold");
+// get data of all employee
+#[get("/users")]
+pub async fn getUsers(
+    credential: BearerAuth,
+    col: Data<(Collection<Document>, Collection<Document>)>,
+) -> impl Responder {
+    if api_views::check_token_and_update_number_of_request(credential.token().to_string(), &col.1)
+        .await
+    {
+        let mut result = col.0.find(doc! {}, None).await.expect("faold");
         let mut data: Vec<Document> = vec![];
 
         while let Some(Ok(i)) = result.next().await {
@@ -104,17 +100,17 @@ pub async fn getUsers(credential: BasicAuth) -> impl Responder {
     }
 }
 
-#[post("/insertuser")]
-pub async fn insertuser(credential: BasicAuth, data: Json<EmployeeDataInsert>) -> impl Responder {
-    if credential.user_id().eq(USERNAME) && credential.password().unwrap().eq(PASSWORD) {
-        let client = Client::with_uri_str("mongodb://localhost:27017")
-            .await
-            .expect("Faild to connect with server");
-
-        let col: Collection<Document> = client.database("FirstDB").collection("Employee");
-
+#[get("/insertuser")]
+pub async fn insertuser(
+    credential: BearerAuth,
+    data: Form<EmployeeDataInsert>,
+    col: Data<(Collection<Document>, Collection<Document>)>,
+) -> impl Responder {
+    if api_views::check_token_and_update_number_of_request(credential.token().to_string(), &col.1)
+        .await
+    {
         let userdata = doc! {"Username":data.Username.to_string(),"Password":data.Password.to_string(),"Employee_name":&data.Employee_name,"Employee_salary":&data.Employee_salary,"Employee_designation":&data.Employee_designation,};
-        match col.insert_one(userdata, None).await {
+        match col.0.insert_one(userdata, None).await {
             Ok(v) => HttpResponse::Ok().body("Successfully added new employee"),
             Err(e) => HttpResponse::InternalServerError().body("No user found this username"),
         }
@@ -123,23 +119,20 @@ pub async fn insertuser(credential: BasicAuth, data: Json<EmployeeDataInsert>) -
     }
 }
 
-
-// update the employee data from their username 
+// update the employee data from their username
 #[post("/updateuser/{username}")]
 pub async fn updateuser(
     username: web::Path<String>,
-    credential: BasicAuth,
-    data: Json<EmployeeDataUpdate>,
+    credential: BearerAuth,
+    data: Form<EmployeeDataUpdate>,
+    col: Data<(Collection<Document>, Collection<Document>)>,
 ) -> impl Responder {
-    if credential.user_id().eq(USERNAME) && credential.password().unwrap().eq(PASSWORD) {
-        let client = Client::with_uri_str("mongodb://localhost:27017")
-            .await
-            .expect("Faild to connect with server");
-
-        let col: Collection<Document> = client.database("FirstDB").collection("Employee");
-
+    if api_views::check_token_and_update_number_of_request(credential.token().to_string(), &col.1)
+        .await
+    {
         let update = doc! {"$set":{"Employee_name":&data.Employee_name,"Employee_salary":&data.Employee_salary,"Employee_designation":&data.Employee_designation,}};
         match col
+            .0
             .update_one(
                 doc! {
                 "Username":
@@ -157,18 +150,18 @@ pub async fn updateuser(
     }
 }
 
-
-// delete the employee data from their username 
-#[post("/deleteuser/{username}")]
-pub async fn deleteuser(username: web::Path<String>, credential: BasicAuth) -> impl Responder {
-    if credential.user_id().eq(USERNAME) && credential.password().unwrap().eq(PASSWORD) {
-        let client = Client::with_uri_str("mongodb://localhost:27017")
-            .await
-            .expect("Faild to connect with server");
-
-        let col: Collection<Document> = client.database("FirstDB").collection("Employee");
-
+// delete the employee data from their username
+#[get("/deleteuser/{username}")]
+pub async fn deleteuser(
+    username: web::Path<String>,
+    credential: BearerAuth,
+    col: Data<(Collection<Document>, Collection<Document>)>,
+) -> impl Responder {
+    if api_views::check_token_and_update_number_of_request(credential.token().to_string(), &col.1)
+        .await
+    {
         match col
+            .0
             .delete_one(doc! {"Username":username.to_string()}, None)
             .await
         {

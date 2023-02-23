@@ -1,27 +1,35 @@
-How to use Employee API
------------------------
+![API Image](https://doc.lucidworks.com/assets/images/logos/datasources/rest-api-logo.png)
+
+#How to use Employee API
+
 
 Note: Replace "http://127.0.0.1:8080/" to  your address.
 
 Note: For every request you have to provide USERNAME and PASSWORD in yor BasicAuth 
 
+Note: For every request you have to provide APIT_Token in yor BearerAuth - `Currently worikng on this`
+ 
+
+`All api only support GET request`
 
 
-1. To get data of perticular employee use below api
+## API for accessing and  modifying employee data
+
+* To get data of perticular employee use below api
 
    URL :
    ```
    http://127.0.0.1:8080/users/{username}
    ```
 
-2. To get data of all employee use below api
+* To get data of all employee use below api
 
    URL :
    ```
    http://127.0.0.1:8080/users
    ```
 
-3. To add new employee use below api
+* To add new employee use below api
    
    URL :
    ```
@@ -39,7 +47,7 @@ Note: For every request you have to provide USERNAME and PASSWORD in yor BasicAu
    }
    ```
 
-4. To update the data of perticular employee use below api
+* To update the data of perticular employee use below api
 
    URL :
    ```
@@ -56,9 +64,28 @@ Note: For every request you have to provide USERNAME and PASSWORD in yor BasicAu
    ```
 
 
-5. To delete perticular employee use below api
+* To delete perticular employee use below api
 
    URL :
    ```
    http://127.0.0.1:8080/deleteuser/{username}
+   ```
+
+
+## API for get API access and for generate new API_Token 
+
+
+* To create new account for accessing employee data
+
+   URL :
+   ```
+   http://127.0.0.1:8080/api/newuser/{username}/{password}
+   ```
+
+
+* To generate new API_Token for accessing employee data
+
+   URL :
+   ```
+   http://127.0.0.1:8080/api/generatenewtoekn/{username}/{password}
    ```
